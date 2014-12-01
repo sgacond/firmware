@@ -355,6 +355,10 @@ void hw_highspeedsignal_update (uint8_t *buf, size_t buf_len);
 int hw_pwm_port_period (uint32_t period);
 int hw_pwm_pin_pulsewidth (int pin, uint32_t pulsewidth);
 
+    
+// encoder
+void hw_encoder_bind(uint8_t pin1, uint8_t pin2);
+    
 // gpio
 
 void hw_digital_output (uint8_t ulPin);

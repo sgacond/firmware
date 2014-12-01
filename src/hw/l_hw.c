@@ -592,6 +592,16 @@ static int l_hw_device_id(lua_State* L)
 	return 1;
 }
 
+// ENCODER
+static int l_hw_encoder_bind(lua_State* L)
+{
+    uint8_t pin1 = (uint8_t)lua_tonumber(L, ARG1);
+	uint8_t pin2 = (uint8_t)lua_tonumber(L, ARG1 + 1);
+    
+    hw_encoder_bind(pin1, pin2);
+	return 0;
+}
+
 
 // pwm
 static int l_hw_pwm_port_period(lua_State *L) {
@@ -1101,6 +1111,9 @@ LUALIB_API int luaopen_hw(lua_State* L)
 		{ "wifi_disable", l_wifi_disable },
 		{ "wifi_enable", l_wifi_enable },
 		{ "wifi_mac_address", l_wifi_mac_address},
+
+		// encoder
+		{ "encoder_bind", l_hw_encoder_bind },
 
 		// End of array (must be last)
 		{ NULL, NULL }

@@ -1528,7 +1528,16 @@ function Tessel() {
   this.deviceId = function(){
     return hw.device_id();
   }; 
-
+  
+  this.bindEncoder = function(pin1, pin2, callback) {
+	process.on('encoder_pulse', function(dir) {
+		if(callback)
+  			callback(dir);
+	});
+	if(!pin1.pin || !pin2.pin)
+		throw "pin1 and pin2 must be valid pin identifiers.";	
+	hw.encoder_bind(pin1.pin, pin2.pin);
+  };
 }
 
 util.inherits(Tessel, EventEmitter);

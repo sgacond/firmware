@@ -266,6 +266,7 @@
         '<(firmware_path)/hw/hw_uart.c',
         '<(firmware_path)/hw/hw_swuart.c',
         '<(firmware_path)/hw/hw_gpdma.c',
+        '<(firmware_path)/hw/hw_encoder.c',
         '<(firmware_path)/hw/l_hw.c',
 
         '<(firmware_path)/sys/sbrk.c',
