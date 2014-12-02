@@ -20,9 +20,9 @@ extern "C" {
 #include <assert.h>
 #include <variant.h>
 
-//uint8_t val = 0;
-double _ts1 = 0;
-double _ts2 = 0;
+uint8_t _val = 0;
+//double _ts1 = 0;
+//double _ts2 = 0;
     
 void encoder_pulse_complete();
 void encoder_irq_handler_pin1();
@@ -55,9 +55,8 @@ void encoder_pulse_complete()
     lua_pushstring(L, "encoder_pulse");
     
     // the state of the other i/o indicates direction
-    lua_pushnumber(L, _ts2 - _ts1);
-    _ts1 = 0;
-    _ts2 = 0;
+    lua_pushnumber(L, _val);
+    _val = 0;
     
     // call _colony_emit to run the JS callback
     tm_checked_call(L, 2);
@@ -75,16 +74,20 @@ void timer_callback() {
     
 void encoder_irq_handler_pin1()
 {
-    _ts1 = tm_timestamp();
-    if(_ts2 > 0)
+    if(_val == 0)
+    {
+        _val = 1;
         tm_event_trigger(&encoder_pulse_event);
+    }
 }
 
 void encoder_irq_handler_pin2()
 {
-    _ts2 = tm_timestamp();
-    if(_ts1 > 0)
+    if(_val == 0)
+    {
+        _val = 2;
         tm_event_trigger(&encoder_pulse_event);
+    }
 }
 
 #ifdef __cplusplus
