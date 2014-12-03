@@ -15,14 +15,8 @@ extern "C" {
 #include "tm.h"
 #include "hw.h"
 #include "colony.h"
-#include <stdint.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <variant.h>
 
 uint8_t _val = 0;
-//double _ts1 = 0;
-//double _ts2 = 0;
     
 void encoder_pulse_complete();
 void encoder_irq_handler_pin1();
@@ -55,28 +49,21 @@ void encoder_pulse_complete()
     lua_pushstring(L, "encoder_pulse");
     
     // the state of the other i/o indicates direction
-    lua_pushnumber(L, _val);
+    lua_pushnumber(L, (_val - 1));
     _val = 0;
     
     // call _colony_emit to run the JS callback
     tm_checked_call(L, 2);
 }
     
-/*void encoder_irq_handler()
-{
-    tm_event_trigger(&encoder_pulse_event);
-}*/
-    
-void timer_callback() {
-    
-}
-
-    
 void encoder_irq_handler_pin1()
 {
     if(_val == 0)
     {
         _val = 1;
+    }
+    if(_val == 2)
+    {
         tm_event_trigger(&encoder_pulse_event);
     }
 }
@@ -86,6 +73,9 @@ void encoder_irq_handler_pin2()
     if(_val == 0)
     {
         _val = 2;
+    }
+    if(_val == 1)
+    {
         tm_event_trigger(&encoder_pulse_event);
     }
 }
