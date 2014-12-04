@@ -16,23 +16,22 @@ extern "C" {
 #include "hw.h"
 #include "colony.h"
 
-uint8_t _val = 0;
+uint8_t _dir, _pin2;
     
 void encoder_pulse_complete();
 void encoder_irq_handler_pin1();
 void encoder_irq_handler_pin2();
 
-void timer_callback();
-
 tm_event encoder_pulse_event = TM_EVENT_INIT(encoder_pulse_complete);
     
 void hw_encoder_bind(uint8_t pin1, uint8_t pin2)
 {
+    // remember pin2
+    _pin2 = pin2;
+    
+    // aquire interrupt id and attach handler on pin1, falling.
     uint8_t intr1 = hw_interrupt_acquire();
     hw_interrupt_watch(pin1, 1 << TM_INTERRUPT_MODE_FALLING, intr1, encoder_irq_handler_pin1);
-
-    uint8_t intr2 = hw_interrupt_acquire();
-    hw_interrupt_watch(pin2, 1 << TM_INTERRUPT_MODE_FALLING, intr2, encoder_irq_handler_pin2);
 }
 
 void encoder_pulse_complete()
@@ -45,12 +44,9 @@ void encoder_pulse_complete()
     
     lua_getglobal(L, "_colony_emit");
     
-    // the process message identifier
+    // push a process message identifier, and the direction flag
     lua_pushstring(L, "encoder_pulse");
-    
-    // the state of the other i/o indicates direction
-    lua_pushnumber(L, (_val - 1));
-    _val = 0;
+    lua_pushnumber(L, _dir);
     
     // call _colony_emit to run the JS callback
     tm_checked_call(L, 2);
@@ -58,26 +54,12 @@ void encoder_pulse_complete()
     
 void encoder_irq_handler_pin1()
 {
-    if(_val == 0)
-    {
-        _val = 1;
-    }
-    if(_val == 2)
-    {
-        tm_event_trigger(&encoder_pulse_event);
-    }
-}
-
-void encoder_irq_handler_pin2()
-{
-    if(_val == 0)
-    {
-        _val = 2;
-    }
-    if(_val == 1)
-    {
-        tm_event_trigger(&encoder_pulse_event);
-    }
+    // check pin2, when pin1 falling
+    // the state of pin2 indicates direction
+    _dir = hw_digital_read(_pin2);
+    
+    // trigger event
+    tm_event_trigger(&encoder_pulse_event);
 }
 
 #ifdef __cplusplus
